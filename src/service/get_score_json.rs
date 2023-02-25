@@ -19,7 +19,7 @@ fn get_long_comment(media_id: &str) -> Vec<Value> {
     return get_comment(url.as_str());
 }
 
-fn get_short_comment(media_id: &str)-> Vec<Value> {
+fn get_short_comment(media_id: &str) -> Vec<Value> {
     let url = format!(
         "{}{}{}",
         "https://api.bilibili.com/pgc/review/short/list?media_id=", media_id, "&ps=20&sort=0"
@@ -37,18 +37,19 @@ fn get_comment(url: &str) -> Vec<Value> {
         }
     };
     vec.push(temp_json["data"]["list"].clone());
-    let next_id = temp_json["data"]["next"].to_string();
+    let mut next_id = temp_json["data"]["next"].to_string();
     loop {
         let url1 = format!("{}{}{}", url, "&cursor=", next_id);
         let temp = match send_get(&url1) {
             Ok(res) => read_json(&res),
-            _ => {
-                print!("获取评分信息错误");
-                process::exit(-1);
+            Err(_) => {
+                // print!("获取评分信息错误{:#?}",vec);
+                break;
+                // process::exit(-1);
             }
         };
         vec.push(temp["data"]["list"].clone());
-        let next_id = temp_json["data"]["next"].to_string();
+        next_id = temp["data"]["next"].to_string();
         if next_id == "0" {
             break;
         }
