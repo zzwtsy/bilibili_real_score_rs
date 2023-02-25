@@ -1,17 +1,16 @@
 use serde_json::Value;
 
-pub fn get_score(vec: Vec<Value>) -> [i64; 5] {
-    let mut one_score: i64 = 0;
-    let mut two_score: i64 = 0;
-    let mut three_score: i64 = 0;
-    let mut four_score: i64 = 0;
-    let mut five_score: i64 = 0;
-    for e in vec.iter() {
-        let num = match e["score"].as_i64() {
-            Some(i) => {
-                i
-            }
-            _ => todo!()
+pub fn get_score(vec: Vec<Value>) -> [i64; 6] {
+    let mut zero_score = 0;
+    let mut one_score = 0;
+    let mut two_score = 0;
+    let mut three_score = 0;
+    let mut four_score = 0;
+    let mut five_score = 0;
+    for e in vec {
+        let num = match e["score"].as_u64() {
+            Some(i) => i,
+            None => continue
         };
         match num {
             2 => one_score = one_score + 1,
@@ -19,9 +18,10 @@ pub fn get_score(vec: Vec<Value>) -> [i64; 5] {
             6 => three_score = three_score + 1,
             8 => four_score = four_score + 1,
             10 => five_score = five_score + 1,
+            0 => zero_score = zero_score + 1,
             _ => (),
         }
     }
-    let score_info = [one_score, two_score, three_score, four_score, five_score];
+    let score_info = [zero_score, one_score, two_score, three_score, four_score, five_score];
     score_info
 }
