@@ -39,6 +39,7 @@ fn get_comment(url: &str) -> Vec<Value> {
             process::exit(-1);
         }
     };
+    //获取 next id 除第一次评论请求外其余请求均需要此序号
     let mut next_id = json["data"]["next"].to_string();
     //获取评论总个数
     let total = json["data"]["total"].as_u64().unwrap();
@@ -56,7 +57,7 @@ fn get_comment(url: &str) -> Vec<Value> {
         for x in temp["data"]["list"].as_array().unwrap() {
             vec.push(x.clone());
             pb.inc(1);
-        };
+        }
         next_id = temp["data"]["next"].to_string();
         if next_id == "0" {
             //完成进度条绘制
