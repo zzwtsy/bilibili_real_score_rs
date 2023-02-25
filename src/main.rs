@@ -1,20 +1,11 @@
 mod service;
 mod utils;
 
-use std::process;
-
-use service::{get_score};
-use utils::send_get;
+use service::get_score;
+use service::get_full_json;
 
 fn main() {
-    let url = "https://api.bilibili.com/pgc/review/long/list?media_id=28235358&ps=20&sort=0";
-    let resp = match send_get(&url) {
-        Ok(res) => res,
-        _ => {
-            print!("获取评分失败");
-            process::exit(-1);
-        }
-    };
-    let score = get_score(&resp);
-    println!("{:#?}", score);
+    let full_json = get_full_json("28235358");
+    let score = get_score(full_json);
+    println!("{:#?}",score);
 }
