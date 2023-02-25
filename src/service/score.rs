@@ -13,12 +13,12 @@ pub fn get_score(vec: Vec<Value>) -> [i64; 6] {
             None => continue
         };
         match num {
-            2 => one_score = one_score + 1,
-            4 => two_score = two_score + 1,
-            6 => three_score = three_score + 1,
-            8 => four_score = four_score + 1,
-            10 => five_score = five_score + 1,
-            0 => zero_score = zero_score + 1,
+            2 => one_score += 1,
+            4 => two_score += 1,
+            6 => three_score += 1,
+            8 => four_score += 1,
+            10 => five_score += 1,
+            0 => zero_score += 1,
             _ => (),
         }
     }
