@@ -16,7 +16,7 @@ fn main() {
         io::stdin()
             .read_line(&mut choice)
             .expect("Failed to read input");
-        let i:i32 = choice.trim().parse().expect("choice to i32 err");
+        let i: i32 = choice.trim().parse().expect("choice to i32 err");
         match i {
             1 => run(),
             0 => {
@@ -41,12 +41,12 @@ fn run() {
     let three_score = score.get(3).unwrap();
     let four_score = score.get(4).unwrap();
     let five_score = score.get(5).unwrap();
-    let real_score = (one_score
-        + (two_score * 2 + three_score * 3 + four_score * 4 + five_score * 5))
-        / (one_score + two_score + three_score + four_score + five_score);
+    let total_score: f64 = ((one_score + (two_score * 2) + (three_score * 3) + (four_score * 4) + (five_score * 5)) * 2) as f64;
+    let total_comment: f64 = (one_score + two_score + three_score + four_score + five_score) as f64;
+    let real_score: f64 = (total_score / total_comment) as f64;
     println!(
         "零分人数：{}\n一分人数：{}\n二分人数：{}\n三分人数：{}\n四分人数：{}\n五分人数：{}",
         zero_score, one_score, two_score, three_score, four_score, five_score
     );
-    println!("真实评分为：{}", real_score);
+    println!("真实评分为：{:.1}", real_score);
 }
