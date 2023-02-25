@@ -1,14 +1,12 @@
-use crate::utils::read_json;
+use serde_json::Value;
 
-pub fn get_score(json: &str) -> [i64; 5]{
+pub fn get_score(vec: Vec<Value>) -> [i64; 5]{
     let mut one_score: i64 = 0;
     let mut two_score: i64 = 0;
     let mut three_score: i64 = 0;
     let mut four_score: i64 = 0;
     let mut five_score: i64 = 0;
-    let json = read_json(json);
-    let list = json["data"]["list"].clone();
-    for e in list.as_array().unwrap().iter() {
+    for e in vec.iter() {
         let num: i64 = e["score"].to_string().parse().expect("score to i64 err");
         match num {
             2 => one_score = one_score + 1,
