@@ -1,8 +1,8 @@
 use std::io;
 use std::process;
+use std::time::Instant;
 
-use service::get_full_json;
-use service::get_score;
+use crate::service::get_full_comment_count;
 
 mod service;
 mod utils;
@@ -33,15 +33,17 @@ fn run() {
     io::stdin()
         .read_line(&mut media_id)
         .expect("Failed to read input");
-    let full_json = get_full_json(media_id.as_str());
-    let score = get_score(full_json);
-    let zero_score = score.get(0).unwrap();
-    let one_score = score.get(1).unwrap();
-    let two_score = score.get(2).unwrap();
-    let three_score = score.get(3).unwrap();
-    let four_score = score.get(4).unwrap();
-    let five_score = score.get(5).unwrap();
-    let total_score: f64 = ((one_score + (two_score * 2) + (three_score * 3) + (four_score * 4) + (five_score * 5)) * 2) as f64;
+    let start = Instant::now();
+    let full_comment_count = get_full_comment_count(media_id.as_str());
+    let zero_score = full_comment_count.get(0).unwrap();
+    let one_score = full_comment_count.get(1).unwrap();
+    let two_score = full_comment_count.get(2).unwrap();
+    let three_score = full_comment_count.get(3).unwrap();
+    let four_score = full_comment_count.get(4).unwrap();
+    let five_score = full_comment_count.get(5).unwrap();
+    let total_score: f64 =
+        ((one_score + (two_score * 2) + (three_score * 3) + (four_score * 4) + (five_score * 5))
+            * 2) as f64;
     let total_comment: f64 = (one_score + two_score + three_score + four_score + five_score) as f64;
     let real_score: f64 = (total_score / total_comment) as f64;
     println!(
@@ -49,4 +51,6 @@ fn run() {
         zero_score, one_score, two_score, three_score, four_score, five_score
     );
     println!("真实评分为：{:.1}", real_score);
+    let duration = start.elapsed();
+    println!("本次计算时间为：{:?}",duration);
 }

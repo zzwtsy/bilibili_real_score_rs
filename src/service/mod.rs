@@ -1,5 +1,3 @@
-mod score;
-mod get_score_json;
+mod score_service;
 
-pub use score::*;
-pub use get_score_json::get_full_json;
+pub use score_service::*;
