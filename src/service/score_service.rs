@@ -1,4 +1,4 @@
-use std::{process, default};
+use std::process;
 
 use indicatif::ProgressBar;
 
