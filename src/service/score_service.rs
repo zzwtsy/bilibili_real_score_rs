@@ -1,26 +1,40 @@
-use std::process;
+use std::{process, default};
 
 use indicatif::ProgressBar;
 
 use crate::utils::{read_json, send_get};
 
-pub fn get_full_comment_count(media_id: &str) -> [i32; 6] {
-    println!("正在获取长评。。。");
-    let long_comments_count = get_long_comment_count(media_id);
-    println!("正在获取短评。。。");
-    let short_comments_count = get_short_comment_count(media_id);
-    let score_count = [
-        long_comments_count.get(0).unwrap() + short_comments_count.get(0).unwrap(),
-        long_comments_count.get(1).unwrap() + short_comments_count.get(1).unwrap(),
-        long_comments_count.get(2).unwrap() + short_comments_count.get(2).unwrap(),
-        long_comments_count.get(3).unwrap() + short_comments_count.get(3).unwrap(),
-        long_comments_count.get(4).unwrap() + short_comments_count.get(4).unwrap(),
-        long_comments_count.get(5).unwrap() + short_comments_count.get(5).unwrap(),
-    ];
-    score_count
+pub struct CommentCount {
+    pub zero_score: u64,
+    pub one_score: u64,
+    pub two_score: u64,
+    pub three_score: u64,
+    pub four_score: u64,
+    pub five_score: u64,
 }
 
-fn get_long_comment_count(media_id: &str) -> [i32; 6] {
+impl Default for CommentCount {
+    fn default() -> CommentCount {
+        CommentCount {
+            zero_score: 0,
+            one_score: 0,
+            two_score: 0,
+            three_score: 0,
+            four_score: 0,
+            five_score: 0,
+        }
+    }
+}
+
+pub fn get_full_comment_count(media_id: &str) -> CommentCount {
+    println!("正在获取长评。。。");
+    get_long_comment_count(media_id);
+    println!("正在获取短评。。。");
+    let comment_count = get_short_comment_count(media_id);
+    comment_count
+}
+
+fn get_long_comment_count(media_id: &str) -> CommentCount {
     let long_url = format!(
         "{}{}{}",
         "https://api.bilibili.com/pgc/review/long/list?media_id=", media_id, "&ps=20&sort=0"
@@ -28,7 +42,7 @@ fn get_long_comment_count(media_id: &str) -> [i32; 6] {
     return get_comment_count(&long_url);
 }
 
-fn get_short_comment_count(media_id: &str) -> [i32; 6] {
+fn get_short_comment_count(media_id: &str) -> CommentCount {
     let short_url = format!(
         "{}{}{}",
         "https://api.bilibili.com/pgc/review/short/list?media_id=", media_id, "&ps=20&sort=0"
@@ -36,13 +50,15 @@ fn get_short_comment_count(media_id: &str) -> [i32; 6] {
     return get_comment_count(&short_url);
 }
 
-fn get_comment_count(url: &str) -> [i32; 6] {
-    let mut zero_score = 0;
-    let mut one_score = 0;
-    let mut two_score = 0;
-    let mut three_score = 0;
-    let mut four_score = 0;
-    let mut five_score = 0;
+fn get_comment_count(url: &str) -> CommentCount {
+    let mut comment_count = CommentCount {
+        zero_score: 0,
+        one_score: 0,
+        two_score: 0,
+        three_score: 0,
+        four_score: 0,
+        five_score: 0,
+    };
     let json = match send_get(url) {
         Ok(res) => read_json(&res),
         Err(_) => {
@@ -58,15 +74,7 @@ fn get_comment_count(url: &str) -> [i32; 6] {
     let pb = ProgressBar::new(total);
     for e in json["data"]["list"].as_array().unwrap() {
         let num = e["score"].as_u64().unwrap();
-        match num {
-            2 => one_score += 1,
-            4 => two_score += 1,
-            6 => three_score += 1,
-            8 => four_score += 1,
-            10 => five_score += 1,
-            0 => zero_score += 1,
-            _ => (),
-        }
+        update_comment_count(num, &mut comment_count);
         pb.inc(1);
     }
     loop {
@@ -80,15 +88,7 @@ fn get_comment_count(url: &str) -> [i32; 6] {
         };
         for e in temp["data"]["list"].as_array().unwrap() {
             let num = e["score"].as_u64().unwrap();
-            match num {
-                2 => one_score += 1,
-                4 => two_score += 1,
-                6 => three_score += 1,
-                8 => four_score += 1,
-                10 => five_score += 1,
-                0 => zero_score += 1,
-                _ => (),
-            }
+            update_comment_count(num, &mut comment_count);
             pb.inc(1);
         }
         next_id = temp["data"]["next"].to_string();
@@ -98,13 +98,17 @@ fn get_comment_count(url: &str) -> [i32; 6] {
             break;
         }
     }
-    let score_info = [
-        zero_score,
-        one_score,
-        two_score,
-        three_score,
-        four_score,
-        five_score,
-    ];
-    score_info
+    comment_count
+}
+
+fn update_comment_count(num : u64, comment_count:&mut CommentCount) {
+    match num {
+        2 => comment_count.one_score += 1,
+        4 => comment_count.two_score += 1,
+        6 => comment_count.three_score += 1,
+        8 => comment_count.four_score += 1,
+        10 => comment_count.five_score += 1,
+        0 => comment_count.zero_score += 1,
+        _ => (),
+    }
 }

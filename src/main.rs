@@ -1,24 +1,23 @@
+use dialoguer::Input;
+
+use crate::service::get_full_comment_count;
 use std::io;
 use std::process;
 use std::time::Instant;
 
-use crate::service::get_full_comment_count;
-
 mod service;
 mod utils;
 
-fn main() {
+fn main() -> io::Result<()> {
     loop {
         println!("1.计算真实评分");
         println!("0.退出程序");
-        println!("请输入对应数字:");
-        let mut choice = String::new();
-        io::stdin()
-            .read_line(&mut choice)
-            .expect("Failed to read input");
-        let i: i32 = choice.trim().parse().expect("choice to i32 err");
-        match i {
-            1 => run(),
+        let input: i32 = Input::new().with_prompt("请输入对应数字").interact_text()?;
+        match input {
+            1 => {
+                let media_id: String= Input::new().with_prompt("请输入 media_id").interact_text()?;
+                run(&media_id);
+            },
             0 => {
                 process::exit(0);
             }
@@ -27,20 +26,15 @@ fn main() {
     }
 }
 
-fn run() {
-    println!("请输入 media_id:");
-    let mut media_id = String::new();
-    io::stdin()
-        .read_line(&mut media_id)
-        .expect("Failed to read input");
+fn run(media_id: &str) {
     let start = Instant::now();
-    let full_comment_count = get_full_comment_count(media_id.as_str());
-    let zero_score = full_comment_count.get(0).unwrap();
-    let one_score = full_comment_count.get(1).unwrap();
-    let two_score = full_comment_count.get(2).unwrap();
-    let three_score = full_comment_count.get(3).unwrap();
-    let four_score = full_comment_count.get(4).unwrap();
-    let five_score = full_comment_count.get(5).unwrap();
+    let full_comment_count = get_full_comment_count(media_id);
+    let zero_score = full_comment_count.zero_score;
+    let one_score = full_comment_count.one_score;
+    let two_score = full_comment_count.two_score;
+    let three_score = full_comment_count.three_score;
+    let four_score = full_comment_count.four_score;
+    let five_score = full_comment_count.five_score;
     let total_score: f64 =
         ((one_score + (two_score * 2) + (three_score * 3) + (four_score * 4) + (five_score * 5))
             * 2) as f64;
@@ -52,5 +46,6 @@ fn run() {
     );
     println!("真实评分为：{:.1}", real_score);
     let duration = start.elapsed();
-    println!("本次计算时间为：{:?}",duration);
+    println!("本次计算时间为：{:.0?}", duration);
+    println!("====================");
 }
